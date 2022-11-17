@@ -19,6 +19,7 @@ import com.ssafy.Whereismyhouse.house.model.dto.House;
 import com.ssafy.Whereismyhouse.house.model.dto.HouseDeal;
 import com.ssafy.Whereismyhouse.house.model.dto.Pollution;
 import com.ssafy.Whereismyhouse.house.model.service.DongCodeService;
+import com.ssafy.Whereismyhouse.house.model.service.HouseDealOnSaleService;
 import com.ssafy.Whereismyhouse.house.model.service.HouseDealService;
 import com.ssafy.Whereismyhouse.house.model.service.HouseService;
 import com.ssafy.Whereismyhouse.house.model.service.PollutionService;
@@ -41,6 +42,8 @@ public class HouseController extends HttpServlet {
 	private DongCodeService dongCodeService ;
 	@Autowired
 	private PollutionService pollutionService ;
+	@Autowired
+	private HouseDealOnSaleService houseDealOnSaleService;
 	
 //	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 //			throws ServletException, IOException {
