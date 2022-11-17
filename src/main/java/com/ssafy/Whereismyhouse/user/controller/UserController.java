@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ssafy.Whereismyhouse.user.model.dto.User;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
+import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
 @Controller
 @RequestMapping("/user")
 public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+
+	@Autowired
+	private JwtServiceImpl jwtService;
 	
 	@Autowired
 	private UserService userService;
@@ -160,8 +165,14 @@ public class UserController extends HttpServlet {
 		User user = userService.login(email, password);
 		System.out.println(email +" " + password + " " + user);
 		if (user != null) {		//login success
+			String accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
+			//String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
+			
+			
 			HttpSession session = request.getSession();
 			session.setAttribute("userInfo", user);
+			session.setAttribute("access-token", accessToken);
+			//session.setAttribute("refresh-token", refreshToken);
 			String referer = request.getHeader("referer");
 			System.out.println(referer);
 			
