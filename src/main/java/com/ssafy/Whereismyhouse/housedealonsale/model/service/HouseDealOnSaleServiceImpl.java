@@ -1,12 +1,12 @@
-package com.ssafy.Whereismyhouse.house.model.service;
+package com.ssafy.Whereismyhouse.housedealonsale.model.service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ssafy.Whereismyhouse.house.model.dao.HouseDealOnSaleDao;
-import com.ssafy.Whereismyhouse.house.model.dto.HouseDealOnSale;
+import com.ssafy.Whereismyhouse.housedealonsale.model.dao.HouseDealOnSaleDao;
+import com.ssafy.Whereismyhouse.housedealonsale.model.dto.HouseDealOnSale;
 
 @Service
 public class HouseDealOnSaleServiceImpl implements HouseDealOnSaleService {

@@ -12,7 +12,7 @@ public class House {
 	private String img;
 	
 	public House() {
-		super();
+		super(); 
 	}
 	
 	public House(int aptCode,String aptName, String dongCode, String dongName, int buildYear, String jibun, String lat, String lng,

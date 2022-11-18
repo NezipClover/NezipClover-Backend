@@ -1,8 +1,8 @@
-package com.ssafy.Whereismyhouse.house.model.service;
+package com.ssafy.Whereismyhouse.housedealonsale.model.service;
 
 import java.util.List;
 
-import com.ssafy.Whereismyhouse.house.model.dto.HouseDealOnSale;
+import com.ssafy.Whereismyhouse.housedealonsale.model.dto.HouseDealOnSale;
 
 
 public interface HouseDealOnSaleService {
