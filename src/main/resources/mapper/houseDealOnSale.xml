@@ -3,7 +3,7 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper
-	namespace="com.ssafy.Whereismyhouse.house.model.dao.HouseDealOnSaleDao">
+	namespace="com.ssafy.Whereismyhouse.housedealonsale.model.dao.HouseDealOnSaleDao">
 
 	<select id="searchAll" resultType="HouseDealOnSale">
 		select * from housedealonsale;
@@ -16,10 +16,10 @@
 	<select id ="searchByaptCode" parameterType="int" resultType ="HouseDealOnSale">
 		select * from housedealonsale where aptCode = #{aptCode};
 	</select>
-	<insert id="insert" parameterType="HouseDealOnSale">
+	<insert id='insert' parameterType="HouseDealOnSale">
 		INSERT INTO housedealonsale 
 		(aptCode, area, floor, type, dealAmount, rentMoney, dealer_email)
-		 VALUES (#{aptCode}, #{area}, #{floor}, #{type}, #{dealAmount}, #{rentMoney}, #{dealer_email});
+		 VALUES (#{aptCode}, #{area}, #{floor}, #{type}, #{dealAmount}, #{rentMoney}, #{dealer_email})
 	</insert>
 	<update id="update" parameterType="HouseDealOnSale">
 		UPDATE housedealonsale

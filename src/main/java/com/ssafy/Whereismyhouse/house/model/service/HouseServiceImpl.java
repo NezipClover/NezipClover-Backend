@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ssafy.Whereismyhouse.house.model.dao.HouseDao;
 import com.ssafy.Whereismyhouse.house.model.dto.House;
+import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 
 @Service
 public class HouseServiceImpl implements HouseService {
@@ -14,8 +15,8 @@ public class HouseServiceImpl implements HouseService {
 	@Autowired
 	private HouseDao  dao;
 	@Override
-	public List<House> searchAll()  {
-		return dao.searchAll();
+	public List<House> searchAll(PageBean pageBean)  {
+		return dao.searchAll(pageBean);
 	}
 
 	@Override
@@ -33,7 +34,7 @@ public class HouseServiceImpl implements HouseService {
 	public House searchByApt(String aptCode)  {
 		return dao.searchByApt(aptCode);
 	}
-
+	
 	@Override
 	public void remove(String aptCode)  {
 		dao.remove(aptCode);
@@ -43,9 +44,5 @@ public class HouseServiceImpl implements HouseService {
 	public List<House> searchByDong(String dongCode)  {
 		return dao.searchByDong(dongCode);
 	}
-//	public static void main(String[] args) throws SQLException {
-//		List<House> houses = dao.searchByDong("평창동");
-//		Gson gson = new Gson();
-//		System.out.println(gson.toJson(houses));
-//	}
+	
 }
