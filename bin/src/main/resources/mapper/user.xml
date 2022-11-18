@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.Whereismyhouse.user.model.dao.UserDao">
+	<select id="login"		parameterType="map"	resultType="user">
+		select * from user where email = #{email} and password = #{password}
+	</select>
+	<select id="emailCheck"		parameterType="String"	resultType="int">
+		select count(*) from user where email = #{email}
+	</select>
+	<insert id="join" parameterType="user">
+		INSERT INTO user(email, name, password) VALUES (#{email}, #{name}, #{password})
+	</insert>
+	
+
+
+	
+	<update id="update" parameterType="user">
+	UPDATE user	SET
+	name = #{name},
+	password = #{password}
+	WHERE email = #{email}
+	</update>
+
+
+	<delete  id="delete" parameterType="map">
+		DELETE FROM user WHERE (email = #{email} and password = #{password})
+	</delete>
+</mapper>

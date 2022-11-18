@@ -1,6 +1,7 @@
 package com.ssafy.Whereismyhouse.user.controller;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.data.redis.core.RedisTemplate;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
@@ -24,8 +26,12 @@ import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 @RequestMapping("/user")
 public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final int REFRESH_TOKEN_EXPIRE_MINUTES = 2; // 주단위
+	private static final int REFRESH_TOKEN_EXPIRE_TIME = 1000 * 30 * REFRESH_TOKEN_EXPIRE_MINUTES;
 	
-
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+	
 	@Autowired
 	private JwtServiceImpl jwtService;
 	
@@ -166,13 +172,20 @@ public class UserController extends HttpServlet {
 		System.out.println(email +" " + password + " " + user);
 		if (user != null) {		//login success
 			String accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
-			//String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
-			
+			String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
 			
 			HttpSession session = request.getSession();
 			session.setAttribute("userInfo", user);
 			session.setAttribute("access-token", accessToken);
+
+			redisTemplate.opsForValue()
+            .set("RT:" + email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+			
+			System.out.println("time...:" + REFRESH_TOKEN_EXPIRE_TIME );
 			//session.setAttribute("refresh-token", refreshToken);
+			
+			
+			
 			String referer = request.getHeader("referer");
 			System.out.println(referer);
 			
