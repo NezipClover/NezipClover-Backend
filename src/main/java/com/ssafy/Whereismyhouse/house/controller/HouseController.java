@@ -9,10 +9,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 import com.ssafy.Whereismyhouse.house.model.dto.House;
@@ -22,17 +27,21 @@ import com.ssafy.Whereismyhouse.house.model.service.DongCodeService;
 import com.ssafy.Whereismyhouse.house.model.service.HouseDealService;
 import com.ssafy.Whereismyhouse.house.model.service.HouseService;
 import com.ssafy.Whereismyhouse.house.model.service.PollutionService;
+import com.ssafy.Whereismyhouse.housedealonsale.controller.HouseDealOnSaleController;
+import com.ssafy.Whereismyhouse.housedealonsale.model.service.HouseDealOnSaleService;
+import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 
 
 
 /**
  * Servlet implementation class HouseController
  */
-@Controller
+@CrossOrigin("*")
+@RestController
 @RequestMapping("/house")
-public class HouseController extends HttpServlet {
+public class HouseController{
 	private static final long serialVersionUID = 1L;
-	
+	private Logger logger = LoggerFactory.getLogger(HouseDealOnSaleController.class);
 	@Autowired
 	private HouseService houseService ;
 	@Autowired
@@ -41,6 +50,8 @@ public class HouseController extends HttpServlet {
 	private DongCodeService dongCodeService ;
 	@Autowired
 	private PollutionService pollutionService ;
+	@Autowired
+	private HouseDealOnSaleService houseDealOnSaleService;
 	
 //	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 //			throws ServletException, IOException {
@@ -91,12 +102,16 @@ public class HouseController extends HttpServlet {
 //			request.getRequestDispatcher(url).forward(request, response);
 //		}
 //	}
-
-	@GetMapping("/searchAll")
-	private String searchAll(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-		List<House> houses = houseService.searchAll();
-		request.setAttribute("houses", houses);
-		return "houseList";
+	@GetMapping("/list")
+	public ResponseEntity<?> houseList(PageBean bean) {
+		logger.debug("houses............................{}",bean);
+		List<House> houses = houseService.searchAll(bean);
+		logger.debug("houseList............................{}",houses);
+		if(houses!=null && !houses.isEmpty()) {
+			return new ResponseEntity<List<House>>(houses, HttpStatus.OK);
+		}else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}
 	}
 
 	@GetMapping("/searchApt")
@@ -134,17 +149,17 @@ public class HouseController extends HttpServlet {
 		;
 	}
 
-	private String mainPage(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-		String dong = request.getParameter("dong");
-		System.out.println("dong ============= " + dong);
-		List<House> houses;
-		if (dong == null) {
-			houses = houseService.searchAll();
-		} else {
-			houses = houseService.searchByDong(dong);
-		}
-		request.setAttribute("houses", houses);
-
-		return "index.jsp";
-	}
+//	private String mainPage(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+//		String dong = request.getParameter("dong");
+//		System.out.println("dong ============= " + dong);
+//		List<House> houses;
+//		if (dong == null) {
+//			houses = houseService.searchAll();
+//		} else {
+//			houses = houseService.searchByDong(dong);
+//		}
+//		request.setAttribute("houses", houses);
+//
+//		return "index.jsp";
+//	}
 }
