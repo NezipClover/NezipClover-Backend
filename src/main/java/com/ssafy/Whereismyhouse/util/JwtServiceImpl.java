@@ -15,9 +15,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.ssafy.Whereismyhouse.exception.UnAuthorizedException;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -112,6 +116,7 @@ public class JwtServiceImpl implements JwtService {
 		String jwt = request.getHeader("access-token");
 		Jws<Claims> claims = null;
 		try {
+			
 			claims = Jwts.parser().setSigningKey(SALT.getBytes("UTF-8")).parseClaimsJws(jwt);
 		} catch (Exception e) {
 //			if (logger.isInfoEnabled()) {
@@ -135,4 +140,32 @@ public class JwtServiceImpl implements JwtService {
 		return (String) this.get("user").get("userid");
 	}
 
+    public Long getExpiration(String accessToken) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
+        // accessToken 남은 유효시간
+        Date expiration = Jwts.parser().setSigningKey(SALT.getBytes("UTF-8")).parseClaimsJws(accessToken).getBody().getExpiration();
+        
+        // 현재 시간
+        Long now = new Date().getTime();
+        System.out.println("expiration..");
+        System.out.println(expiration.getTime() - now);
+        return (expiration.getTime() - now);
+    }
+    
+    
+    // 토큰 정보를 검증하는 메서드
+    public boolean validateToken(String token) throws MalformedJwtException, SignatureException, UnsupportedEncodingException {
+        try {
+            Jwts.parser().setSigningKey(SALT.getBytes("UTF-8")).parseClaimsJws(token);
+            return true;
+        
+        } catch (ExpiredJwtException e) {
+            logger.info("Expired JWT Token", e);
+        } catch (UnsupportedJwtException e) {
+            logger.info("Unsupported JWT Token", e);
+        } catch (IllegalArgumentException e) {
+            logger.info("JWT claims string is empty.", e);
+        }
+        return false;
+    }
+	
 }

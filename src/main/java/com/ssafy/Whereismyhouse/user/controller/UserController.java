@@ -1,5 +1,6 @@
 package com.ssafy.Whereismyhouse.user.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +22,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 @Controller
 @RequestMapping("/user")
@@ -139,14 +145,49 @@ public class UserController extends HttpServlet {
 	}
 	
 	@PostMapping("/modifyProfile")
-	private String modifyProfile(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-	    HttpSession session = request.getSession();
+	private String modifyProfile(HttpServletRequest request, HttpServletResponse response) throws SQLException, MalformedJwtException, SignatureException, UnsupportedEncodingException {
+	    System.out.println("프로필 수정...");
+		
+		
+		HttpSession session = request.getSession();
+	    
 	    
 	    String name = request.getParameter("name");
 	    String email = ((User) session.getAttribute("userInfo")).getEmail();
 	    String pwd = request.getParameter("pwd");
 	    
+	  /* 
+	    // jwt access 토큰이 유효한지 아닌지 검사합니다.
+	    // 유효하다면 변경 작업을 그대로 수행하고,
+	    // 유효하지 않다면 해당 이메일로 redis의 리프레시 토큰이 있는지 검사,
+	    		// 리프레시 토큰이 유효한 경우 ->  액세스 토큰을 재발급
+	    		// 리프레시 토큰이 유효하지 않으면 액세스 토큰과 refresh 토큰을 재발급
+	    
+	  */  
 	    User user = new User(email, name, pwd);
+
+	    
+	    
+	    String accessToken = (String) session.getAttribute("access-token");
+		// 1. Access Token 검증
+        if (!jwtService.validateToken(accessToken)) {
+        	System.out.println();
+            // 유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급
+        	System.out.println("유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급");
+			accessToken = jwtService.createAccessToken("userid", email);// key, data
+			String refreshToken = jwtService.createRefreshToken("userid", email);// key, data
+			
+			session = request.getSession();
+			session.setAttribute("userInfo", user);
+			session.setAttribute("access-token", accessToken);
+			redisTemplate.opsForValue()
+            .set("RT:" + email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+			
+        }
+	    
+	    
+	    
+	    
 
 	    session.setAttribute("userInfo", user);
 	    String referer = request.getHeader("referer");
@@ -184,6 +225,7 @@ public class UserController extends HttpServlet {
 			System.out.println("time...:" + REFRESH_TOKEN_EXPIRE_TIME );
 			//session.setAttribute("refresh-token", refreshToken);
 			
+			System.out.println("login 성공... access token : " + accessToken);
 			
 			
 			String referer = request.getHeader("referer");
@@ -197,8 +239,27 @@ public class UserController extends HttpServlet {
 	}
 	
 	@GetMapping("/logout")
-	private String logout(HttpServletRequest request, Model model) throws SQLException {
+	private String logout(HttpServletRequest request, Model model) throws SQLException, ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
 		HttpSession session = request.getSession();
+		String accessToken = (String) session.getAttribute("access-token");
+        System.out.println("logout 요청..");
+
+        
+     // 2. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
+        User user = (User) session.getAttribute("userInfo");
+        String email = user.getEmail();
+        if (redisTemplate.opsForValue().get("RT:" + email)
+        		!= null) {
+            // Refresh Token 삭제
+            redisTemplate.delete("RT:" + email);
+            System.out.println("refresh token 삭제...");
+        }
+        
+        System.out.println("더이상 유효하지 않게 된 accesstoken을 blacklist 추가..");
+		// accessToken을 key로 가지며 해당 토큰의 잔여 유효시간 만큼을 
+		// 유효시간으로 가지는 blacklist를 추가합니다.
+		redisTemplate.opsForValue()
+        .set(accessToken, "logout", jwtService.getExpiration(accessToken), TimeUnit.MILLISECONDS);
 		session.invalidate();
 		return "redirect:../";
 	}
