@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.Whereismyhouse.house.model.dao.HouseDao">
+	
+<select id = "searchByDong" parameterType="string" resultType="house">
+select *               
+from houseinfo         
+where dongCode = #{dongCode} 
+
+
+</select>
+<select id="searchAll" resultType="House">
+select * from houseinfo
+</select>
+
+
+
+
+	
+	
+	
+	
+	
+</mapper>

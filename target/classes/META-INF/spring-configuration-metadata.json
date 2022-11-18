@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "spring.redis",
+      "type": "com.ssafy.Whereismyhouse.config.RedisProperties",
+      "sourceType": "com.ssafy.Whereismyhouse.config.RedisProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.redis.host",
+      "type": "java.lang.String",
+      "sourceType": "com.ssafy.Whereismyhouse.config.RedisProperties"
+    },
+    {
+      "name": "spring.redis.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.ssafy.Whereismyhouse.config.RedisProperties"
+    }
+  ],
+  "hints": []
+}
