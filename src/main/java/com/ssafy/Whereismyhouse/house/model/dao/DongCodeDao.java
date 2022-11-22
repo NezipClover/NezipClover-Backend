@@ -1,9 +1,10 @@
 package com.ssafy.Whereismyhouse.house.model.dao;
 
-import java.sql.SQLException;
-
 import org.apache.ibatis.annotations.Mapper;
+
+import com.ssafy.Whereismyhouse.house.model.dto.DongCode;
+import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 @Mapper
 public interface DongCodeDao {
-	String getDongCode(String sido, String gugun, String dong );
+	DongCode getDongCode(String dongName );
 }

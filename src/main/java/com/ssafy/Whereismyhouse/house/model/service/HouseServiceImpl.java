@@ -44,5 +44,10 @@ public class HouseServiceImpl implements HouseService {
 	public List<House> searchByDong(String dongCode)  {
 		return dao.searchByDong(dongCode);
 	}
+
+	@Override
+	public Integer getAptCode() {
+		return dao.getAptCode();
+	}
 	
 }

@@ -34,8 +34,15 @@
 			<include refid="searchcon" />
 		</where>
 	</select>
+	<select id="getAptCode"  resultType="integer">
+		select count(*) from houseinfo
+		
+	</select>
 
-
+	<insert id ='insert' parameterType="House">
+		insert into houseinfo(aptCode,aptName,dongCode,dongName,buildYear,jibun,lat,lng)
+		values(#{aptCode},#{aptName},#{dongCode},#{dongName},#{buildYear},#{jibun},#{lat},#{lng})
+	</insert>
 
 
 

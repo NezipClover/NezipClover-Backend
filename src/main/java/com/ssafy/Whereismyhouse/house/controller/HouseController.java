@@ -16,10 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
+import com.ssafy.Whereismyhouse.house.model.dto.DongCode;
 import com.ssafy.Whereismyhouse.house.model.dto.House;
 import com.ssafy.Whereismyhouse.house.model.dto.HouseDeal;
 import com.ssafy.Whereismyhouse.house.model.dto.Pollution;
@@ -28,6 +32,7 @@ import com.ssafy.Whereismyhouse.house.model.service.HouseDealService;
 import com.ssafy.Whereismyhouse.house.model.service.HouseService;
 import com.ssafy.Whereismyhouse.house.model.service.PollutionService;
 import com.ssafy.Whereismyhouse.housedealonsale.controller.HouseDealOnSaleController;
+import com.ssafy.Whereismyhouse.housedealonsale.model.dto.HouseDealOnSale;
 import com.ssafy.Whereismyhouse.housedealonsale.model.service.HouseDealOnSaleService;
 import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 
@@ -52,6 +57,8 @@ public class HouseController{
 	private PollutionService pollutionService ;
 	@Autowired
 	private HouseDealOnSaleService houseDealOnSaleService;
+	
+	private static final String SUCCESS="success";
 	
 //	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 //			throws ServletException, IOException {
@@ -113,6 +120,36 @@ public class HouseController{
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		}
 	}
+	@GetMapping("/getdongname")
+	public ResponseEntity<?> dongName(@RequestParam String dongname) {
+		logger.debug("dongName............................{}",dongname);
+		DongCode dongCode = dongCodeService.getDongCode(dongname);
+		logger.debug("dongCode............................{}",dongCode);
+		if(dongCode!=null ) {
+			return new ResponseEntity<DongCode>(dongCode, HttpStatus.OK);
+		}else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}
+	}
+	@GetMapping("/getaptcode")
+	public ResponseEntity<?> aptCode() {
+		Integer aptCode = houseService.getAptCode()+1;
+		System.out.println("aptCode.........................."+aptCode);
+		logger.debug("newAptCode............................{}",aptCode);
+		if(aptCode!=null ) {
+			return new ResponseEntity<Integer>(aptCode, HttpStatus.OK);
+		}else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}
+	}
+	@PostMapping("/regist")
+	public ResponseEntity<String> regist(@RequestBody House house) {
+		System.out.println("regist................................");
+		System.out.println(house.toString());
+		logger.debug("onSale regist..............................{}",house);
+		houseService.insert(house);
+		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+	}
 
 	@GetMapping("/searchApt")
 	private String searchApt(HttpServletRequest request, HttpServletResponse response) throws SQLException {
@@ -121,33 +158,33 @@ public class HouseController{
 		request.setAttribute("houseDeals", houseDeals);
 		return "houseDealList";
 	}
-	@GetMapping("/getDong")
-	private void getDong(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-		String dong = request.getParameter("dong");
-		String gugun = request.getParameter("gugun");
-		String sido = request.getParameter("sido")+"%";
-		System.out.println("dong gugun sido...." + dong + " " + gugun + " " + sido);
-		String dongCode = dongCodeService.getDongCode(sido, gugun, dong);
-		System.out.println(dongCode);
-		System.out.println("getDongCode..............");
-		List<House> houses = houseService.searchByDong(dongCode);
-		dongCode=dongCode.substring(0,5);
-		int intDongCode=Integer.parseInt(dongCode);
-		System.out.println(intDongCode);
-		List<Pollution> pollutions = pollutionService.searchByDong(intDongCode,dong);
-		
-		Gson gson = new Gson();
-		String jsonObjectHouses = gson.toJson(houses);
-		String jsonObjectPollutions = gson.toJson(pollutions);
-		String jsonObject = "{ \"houses\" : "+jsonObjectHouses+",\"pollutions\" : "+jsonObjectPollutions+"}";	
-		
-		
-		response.setCharacterEncoding("utf-8");
-		PrintWriter out = response.getWriter();
-		out.write(jsonObject);
-		
-		;
-	}
+//	@GetMapping("/getDong")
+//	private void getDong(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+//		String dong = request.getParameter("dong");
+//		String gugun = request.getParameter("gugun");
+//		String sido = request.getParameter("sido")+"%";
+//		System.out.println("dong gugun sido...." + dong + " " + gugun + " " + sido);
+//		String dongCode = dongCodeService.getDongCode(sido, gugun, dong);
+//		System.out.println(dongCode);
+//		System.out.println("getDongCode..............");
+//		List<House> houses = houseService.searchByDong(dongCode);
+//		dongCode=dongCode.substring(0,5);
+//		int intDongCode=Integer.parseInt(dongCode);
+//		System.out.println(intDongCode);
+//		List<Pollution> pollutions = pollutionService.searchByDong(intDongCode,dong);
+//		
+//		Gson gson = new Gson();
+//		String jsonObjectHouses = gson.toJson(houses);
+//		String jsonObjectPollutions = gson.toJson(pollutions);
+//		String jsonObject = "{ \"houses\" : "+jsonObjectHouses+",\"pollutions\" : "+jsonObjectPollutions+"}";	
+//		
+//		
+//		response.setCharacterEncoding("utf-8");
+//		PrintWriter out = response.getWriter();
+//		out.write(jsonObject);
+//		
+//		;
+//	}
 
 //	private String mainPage(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 //		String dong = request.getParameter("dong");

@@ -1,7 +1,7 @@
 package com.ssafy.Whereismyhouse.house.model.service;
 
-import java.sql.SQLException;
+import com.ssafy.Whereismyhouse.house.model.dto.DongCode;
 
 public interface DongCodeService {
-	String getDongCode(String sido, String gugun, String dong );
+	DongCode getDongCode(String dongName );
 }
