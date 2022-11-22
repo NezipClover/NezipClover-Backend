@@ -19,7 +19,8 @@
 	<update id="update" parameterType="user">
 	UPDATE user	SET
 	name = #{name},
-	password = #{password}
+	password = #{password},
+	userKind = #{userKind}
 	WHERE email = #{email}
 	</update>
 
