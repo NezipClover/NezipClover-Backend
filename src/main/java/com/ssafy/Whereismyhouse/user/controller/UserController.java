@@ -2,6 +2,7 @@ package com.ssafy.Whereismyhouse.user.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServlet;
@@ -9,17 +10,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import com.ssafy.Whereismyhouse.house.model.dto.House;
+import com.ssafy.Whereismyhouse.housedealonsale.controller.HouseDealOnSaleController;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
+import com.ssafy.Whereismyhouse.user.model.dto.UserLogin;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
@@ -28,13 +40,14 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-@Controller
+@CrossOrigin("*")
+@RestController
 @RequestMapping("/user")
 public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int REFRESH_TOKEN_EXPIRE_MINUTES = 2; // 주단위
 	private static final int REFRESH_TOKEN_EXPIRE_TIME = 1000 * 30 * REFRESH_TOKEN_EXPIRE_MINUTES;
-	
+	private Logger logger = LoggerFactory.getLogger(UserController.class);
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	
@@ -101,7 +114,7 @@ public class UserController extends HttpServlet {
 //	}
 
 	@GetMapping("delete")
-	private String delete(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+	private ResponseEntity<?> delete(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("userInfo");
 		String email = user.getEmail();
@@ -109,7 +122,10 @@ public class UserController extends HttpServlet {
 		System.out.println("delete..." + email + ", " + pwd);
 		int res = userService.delete(email, pwd);
 		System.out.println(res);
-		return "redirect:../";
+		
+		return new ResponseEntity<List<House>>(HttpStatus.OK);
+		
+		//return "redirect:../";
 	}
 
 
@@ -145,7 +161,7 @@ public class UserController extends HttpServlet {
 	}
 	
 	@PostMapping("/modifyProfile")
-	private String modifyProfile(HttpServletRequest request, HttpServletResponse response) throws SQLException, MalformedJwtException, SignatureException, UnsupportedEncodingException {
+	private ResponseEntity<?> modifyProfile(HttpServletRequest request, HttpServletResponse response) throws SQLException, MalformedJwtException, SignatureException, UnsupportedEncodingException {
 	    System.out.println("프로필 수정...");
 		
 		
@@ -199,18 +215,18 @@ public class UserController extends HttpServlet {
 		System.out.println(name);
 		System.out.println(email);
 		System.out.println(pwd);
-	    
-	    return "redirect:/user/profile";
+		return new ResponseEntity<String>("success", HttpStatus.OK);
+		
+	   //return "redirect:/user/profile";
 
 	}
 
 	@PostMapping("/login")
-	private String login(HttpServletRequest request, Model model) throws SQLException {
-		String email = request.getParameter("email");
-		String password = request.getParameter("password");
-		
-		User user = userService.login(email, password);
-		System.out.println(email +" " + password + " " + user);
+	private  ResponseEntity<String> login(HttpServletRequest request, @RequestBody UserLogin dto) throws SQLException {
+		logger.info(dto.toString());
+		User user = userService.login(dto.getEmail(), dto.getPassword());
+		System.out.println(dto.getEmail() +" " + dto.getPassword() + " " + user);
+
 		if (user != null) {		//login success
 			String accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
 			String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
@@ -220,26 +236,27 @@ public class UserController extends HttpServlet {
 			session.setAttribute("access-token", accessToken);
 
 			redisTemplate.opsForValue()
-            .set("RT:" + email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+            .set("RT:" + dto.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 			
 			System.out.println("time...:" + REFRESH_TOKEN_EXPIRE_TIME );
 			//session.setAttribute("refresh-token", refreshToken);
 			
 			System.out.println("login 성공... access token : " + accessToken);
-			
+			System.out.println(session.getAttribute("access-token"));
 			
 			String referer = request.getHeader("referer");
 			System.out.println(referer);
-			
-			return "redirect:../index";
+			return new ResponseEntity<String>("success", HttpStatus.OK);
+			//return "redirect:../index";
 		} else {	//login fail
 			request.setAttribute("msg", "아이디 또는 비밀번호를 확인해주세요!");
-			return "user/login";
+			return new ResponseEntity<String>("fail", HttpStatus.OK);
+			//return "user/login";
 		}		
 	}
 	
 	@GetMapping("/logout")
-	private String logout(HttpServletRequest request, Model model) throws SQLException, ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
+	private ResponseEntity<?> logout(HttpServletRequest request, Model model) throws SQLException, ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
 		HttpSession session = request.getSession();
 		String accessToken = (String) session.getAttribute("access-token");
         System.out.println("logout 요청..");
@@ -261,7 +278,8 @@ public class UserController extends HttpServlet {
 		redisTemplate.opsForValue()
         .set(accessToken, "logout", jwtService.getExpiration(accessToken), TimeUnit.MILLISECONDS);
 		session.invalidate();
-		return "redirect:../";
+		//return "redirect:../";
+		return new ResponseEntity<String>("success", HttpStatus.OK);
 	}
 	
 	
@@ -280,25 +298,22 @@ public class UserController extends HttpServlet {
 		return 500;
 	}
 	
-	@GetMapping("/register")
-	private String registerForm(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-		System.out.println(123123);
-		return "/user/register";
-	}
-	
+//	@GetMapping("/register")
+//	private String registerForm(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+//		System.out.println(123123);
+//		return "/user/register";
+//	}
+//	
 
 	
 	@PostMapping("/register")
-	private String register(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+	private ResponseEntity<String> register(@RequestBody User user) throws SQLException {
 		System.out.println("regist....");
-		User user = new User(
-				request.getParameter("email"),
-				request.getParameter("name"),
-				request.getParameter("password")		
-				);
+		
 		System.out.println("join: " + user);
 		userService.join(user);
-		return "redirect:../";
+		//return "redirect:../";
+		return new ResponseEntity<String>("success", HttpStatus.OK);
 	}
 
 }
