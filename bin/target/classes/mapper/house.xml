@@ -2,25 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.ssafy.Whereismyhouse.house.model.dao.HouseDao">
-	
-<select id = "searchByDong" parameterType="string" resultType="house">
-select *               
-from houseinfo         
-where dongCode = #{dongCode} 
+<mapper
+	namespace="com.ssafy.Whereismyhouse.house.model.dao.HouseDao">
+
+	<sql id='searchcon'>
+		<if test="word != null and word !='' ">
+			<choose>
+				<when test=" key =='aptCode'">
+					aptCode = #{word}
+				</when>
+				<when test=" key =='aptName'">
+					aptName like concat('%',#{word},'%')
+				</when>
+				<when test=" key =='dongName'">
+					dongName like concat('%',#{word},'%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<select id="searchByDong" parameterType="string"
+		resultType="house">
+		select *
+		from houseinfo
+		where dongCode = #{dongCode}
 
 
-</select>
-<select id="searchAll" resultType="House">
-select * from houseinfo
-</select>
+	</select>
+	<select id="searchAll" parameterType="PageBean" resultType="House">
+		select * from houseinfo
+		<where>
+			<include refid="searchcon" />
+		</where>
+	</select>
 
 
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
 </mapper>

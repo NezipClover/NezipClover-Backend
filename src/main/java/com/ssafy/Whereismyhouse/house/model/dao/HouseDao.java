@@ -16,4 +16,5 @@ public interface HouseDao {
 	House searchByApt(String aptCode) ;
 	List<House> searchByDong(String dongCode) ;
 	void    remove(String aptCode) ;
+	Integer getAptCode();
 }
