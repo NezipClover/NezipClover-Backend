@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -20,13 +22,16 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.ssafy.Whereismyhouse.house.model.dto.House;
+import com.ssafy.Whereismyhouse.housedealonsale.controller.HouseDealOnSaleController;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
+import com.ssafy.Whereismyhouse.user.model.dto.UserLogin;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
@@ -42,7 +47,7 @@ public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int REFRESH_TOKEN_EXPIRE_MINUTES = 2; // 주단위
 	private static final int REFRESH_TOKEN_EXPIRE_TIME = 1000 * 30 * REFRESH_TOKEN_EXPIRE_MINUTES;
-	
+	private Logger logger = LoggerFactory.getLogger(UserController.class);
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	
@@ -217,12 +222,11 @@ public class UserController extends HttpServlet {
 	}
 
 	@PostMapping("/login")
-	private  ResponseEntity<?> login(HttpServletRequest request, Model model) throws SQLException {
-		String email = request.getParameter("email");
-		String password = request.getParameter("password");
-		
-		User user = userService.login(email, password);
-		System.out.println(email +" " + password + " " + user);
+	private  ResponseEntity<String> login(HttpServletRequest request, @RequestBody UserLogin dto) throws SQLException {
+		logger.info(dto.toString());
+		User user = userService.login(dto.getEmail(), dto.getPassword());
+		System.out.println(dto.getEmail() +" " + dto.getPassword() + " " + user);
+
 		if (user != null) {		//login success
 			String accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
 			String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
@@ -232,13 +236,13 @@ public class UserController extends HttpServlet {
 			session.setAttribute("access-token", accessToken);
 
 			redisTemplate.opsForValue()
-            .set("RT:" + email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+            .set("RT:" + dto.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 			
 			System.out.println("time...:" + REFRESH_TOKEN_EXPIRE_TIME );
 			//session.setAttribute("refresh-token", refreshToken);
 			
 			System.out.println("login 성공... access token : " + accessToken);
-			
+			System.out.println(session.getAttribute("access-token"));
 			
 			String referer = request.getHeader("referer");
 			System.out.println(referer);
@@ -294,22 +298,18 @@ public class UserController extends HttpServlet {
 		return 500;
 	}
 	
-	@GetMapping("/register")
-	private String registerForm(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-		System.out.println(123123);
-		return "/user/register";
-	}
-	
+//	@GetMapping("/register")
+//	private String registerForm(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+//		System.out.println(123123);
+//		return "/user/register";
+//	}
+//	
 
 	
 	@PostMapping("/register")
-	private ResponseEntity<?> register(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+	private ResponseEntity<String> register(@RequestBody User user) throws SQLException {
 		System.out.println("regist....");
-		User user = new User(
-				request.getParameter("email"),
-				request.getParameter("name"),
-				request.getParameter("password")		
-				);
+		
 		System.out.println("join: " + user);
 		userService.join(user);
 		//return "redirect:../";
