@@ -5,15 +5,24 @@ public class User {
 	private String email;
 	private String name;
 	private String password;
+	private int userKind;
 	
 	public User() {}
-	public User(String email, String name, String password) {
+	public User(String email, String name, String password, int userKind) {
 		super();
 		this.email = email;
 		this.name = name;
 		this.password = password;
+		this.userKind = userKind;
 	}
 	
+
+	public int getUserKind() {
+		return userKind;
+	}
+	public void setUserKind(int userKind) {
+		this.userKind = userKind;
+	}
 	public String getName() {
 		return name;
 	}
@@ -32,12 +41,10 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("UserDto [name=").append(name).append(", password=").append(password)
-				.append(", email=").append(email).append("]");
-		return builder.toString();
+		return "User [email=" + email + ", name=" + name + ", password=" + password + ", userKind=" + userKind + "]";
 	}
+	
+
 }

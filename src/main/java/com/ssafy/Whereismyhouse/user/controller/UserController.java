@@ -2,7 +2,6 @@ package com.ssafy.Whereismyhouse.user.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServlet;
@@ -16,22 +15,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.redis.core.RedisTemplate;
 
-import com.ssafy.Whereismyhouse.house.model.dto.House;
-import com.ssafy.Whereismyhouse.housedealonsale.controller.HouseDealOnSaleController;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
 import com.ssafy.Whereismyhouse.user.model.dto.UserLogin;
+import com.ssafy.Whereismyhouse.user.model.dto.UserLoginResponse;
+import com.ssafy.Whereismyhouse.user.model.dto.UserModifyRequest;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
@@ -113,40 +110,40 @@ public class UserController extends HttpServlet {
 //		}
 //	}
 
-	@GetMapping("delete")
-	private ResponseEntity<?> delete(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-		HttpSession session = request.getSession();
-		User user = (User) session.getAttribute("userInfo");
-		String email = user.getEmail();
-		String pwd = user.getPassword();
+	@PostMapping("delete")
+	private ResponseEntity<?> delete(HttpServletRequest request, @RequestBody UserModifyRequest dto, HttpServletResponse response) throws SQLException {
+		String email = dto.getEmail();
+		String pwd = dto.getPassword();
 		System.out.println("delete..." + email + ", " + pwd);
 		int res = userService.delete(email, pwd);
 		System.out.println(res);
 		
-		return new ResponseEntity<List<House>>(HttpStatus.OK);
+		HttpSession session = request.getSession();
+		session.invalidate();
+		return new ResponseEntity<String>("success", HttpStatus.OK);
 		
 		//return "redirect:../";
 	}
 
 
-	private String update(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-
-		HttpSession session = request.getSession();
-		
-		String name = request.getParameter("name");
-		String email = ((User) session.getAttribute("userInfo")).getEmail();
-		String pwd = request.getParameter("pwd");
-
-		User user = new User(name, pwd, email);
-
-		session.setAttribute("userInfo", user);
-		String referer = request.getHeader("referer");
-		System.out.println(referer);
-
-		userService.update(user);
-		
-		return "redirect:user/profile";
-	}
+//	private String update(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+//
+//		HttpSession session = request.getSession();
+//		
+//		String name = request.getParameter("name");
+//		String email = ((User) session.getAttribute("userInfo")).getEmail();
+//		String pwd = request.getParameter("pwd");
+//
+//		User user = new User(email, name, password, user);
+//
+//		session.setAttribute("userInfo", user);
+//		String referer = request.getHeader("referer");
+//		System.out.println(referer);
+//
+//		userService.update(user);
+//		
+//		return "redirect:user/profile";
+//	}
 
 	
 	@GetMapping("/profile")
@@ -161,16 +158,12 @@ public class UserController extends HttpServlet {
 	}
 	
 	@PostMapping("/modifyProfile")
-	private ResponseEntity<?> modifyProfile(HttpServletRequest request, HttpServletResponse response) throws SQLException, MalformedJwtException, SignatureException, UnsupportedEncodingException {
+	private ResponseEntity<?> modifyProfile(HttpServletRequest request, @RequestBody UserModifyRequest dto, HttpServletResponse response) throws SQLException, MalformedJwtException, SignatureException, UnsupportedEncodingException {
 	    System.out.println("프로필 수정...");
 		
 		
 		HttpSession session = request.getSession();
-	    
-	    
-	    String name = request.getParameter("name");
-	    String email = ((User) session.getAttribute("userInfo")).getEmail();
-	    String pwd = request.getParameter("pwd");
+
 	    
 	  /* 
 	    // jwt access 토큰이 유효한지 아닌지 검사합니다.
@@ -180,7 +173,7 @@ public class UserController extends HttpServlet {
 	    		// 리프레시 토큰이 유효하지 않으면 액세스 토큰과 refresh 토큰을 재발급
 	    
 	  */  
-	    User user = new User(email, name, pwd);
+	    User user = new User(dto.getEmail(), dto.getName(), dto.getPassword(), dto.getUserKind());
 
 	    
 	    
@@ -190,14 +183,14 @@ public class UserController extends HttpServlet {
         	System.out.println();
             // 유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급
         	System.out.println("유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급");
-			accessToken = jwtService.createAccessToken("userid", email);// key, data
-			String refreshToken = jwtService.createRefreshToken("userid", email);// key, data
+			accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
+			String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
 			
 			session = request.getSession();
 			session.setAttribute("userInfo", user);
 			session.setAttribute("access-token", accessToken);
 			redisTemplate.opsForValue()
-            .set("RT:" + email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+            .set("RT:" + user.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 			
         }
 	    
@@ -212,9 +205,7 @@ public class UserController extends HttpServlet {
 	    userService.update(user);
 	    System.out.println("modifyProfile....");
 		
-		System.out.println(name);
-		System.out.println(email);
-		System.out.println(pwd);
+	    System.out.println(user);
 		return new ResponseEntity<String>("success", HttpStatus.OK);
 		
 	   //return "redirect:/user/profile";
@@ -222,7 +213,7 @@ public class UserController extends HttpServlet {
 	}
 
 	@PostMapping("/login")
-	private  ResponseEntity<String> login(HttpServletRequest request, @RequestBody UserLogin dto) throws SQLException {
+	private  ResponseEntity<?> login(HttpServletRequest request, @RequestBody UserLogin dto) throws SQLException {
 		logger.info(dto.toString());
 		User user = userService.login(dto.getEmail(), dto.getPassword());
 		System.out.println(dto.getEmail() +" " + dto.getPassword() + " " + user);
@@ -246,11 +237,23 @@ public class UserController extends HttpServlet {
 			
 			String referer = request.getHeader("referer");
 			System.out.println(referer);
-			return new ResponseEntity<String>("success", HttpStatus.OK);
+			return new ResponseEntity<UserLoginResponse>(
+					new UserLoginResponse(user.getEmail(),
+							user.getName(),
+							user.getPassword(),
+							user.getUserKind(),
+							"success")
+					, HttpStatus.OK);
 			//return "redirect:../index";
 		} else {	//login fail
 			request.setAttribute("msg", "아이디 또는 비밀번호를 확인해주세요!");
-			return new ResponseEntity<String>("fail", HttpStatus.OK);
+			return new ResponseEntity<UserLoginResponse>(
+					new UserLoginResponse("",
+							"",
+							"",
+							0,
+							"fail")
+					, HttpStatus.OK);
 			//return "user/login";
 		}		
 	}
