@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,14 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ssafy.Whereismyhouse.user.model.dto.User;
 import com.ssafy.Whereismyhouse.user.model.dto.UserLogin;
 import com.ssafy.Whereismyhouse.user.model.dto.UserLoginResponse;
+import com.ssafy.Whereismyhouse.user.model.dto.UserLogoutRequest;
 import com.ssafy.Whereismyhouse.user.model.dto.UserModifyRequest;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 
 @CrossOrigin("*")
 @RestController
@@ -225,7 +223,7 @@ public class UserController extends HttpServlet {
 			HttpSession session = request.getSession();
 			session.setAttribute("userInfo", user);
 			session.setAttribute("access-token", accessToken);
-
+			System.out.println("로그인후 세션 정보 저장..." + session.getAttribute("userInfo"));
 			redisTemplate.opsForValue()
             .set("RT:" + dto.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 			
@@ -242,7 +240,7 @@ public class UserController extends HttpServlet {
 							user.getName(),
 							user.getPassword(),
 							user.getUserKind(),
-							"success")
+							"success", accessToken)
 					, HttpStatus.OK);
 			//return "redirect:../index";
 		} else {	//login fail
@@ -252,22 +250,23 @@ public class UserController extends HttpServlet {
 							"",
 							"",
 							0,
-							"fail")
+							"fail", "")
 					, HttpStatus.OK);
 			//return "user/login";
 		}		
 	}
 	
-	@GetMapping("/logout")
-	private ResponseEntity<?> logout(HttpServletRequest request, Model model) throws SQLException, ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
-		HttpSession session = request.getSession();
-		String accessToken = (String) session.getAttribute("access-token");
-        System.out.println("logout 요청..");
+	@PostMapping("/logout")
+	private ResponseEntity<?> logout(HttpServletRequest request, @RequestBody UserLogoutRequest dto) throws SQLException, MalformedJwtException, SignatureException, IllegalArgumentException, UnsupportedEncodingException {
 
+		String accessToken = dto.getAccessToken();
+        System.out.println("logout 요청..");
+        System.out.println(accessToken);
         
      // 2. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
-        User user = (User) session.getAttribute("userInfo");
-        String email = user.getEmail();
+        
+        
+        String email = dto.getEmail();
         if (redisTemplate.opsForValue().get("RT:" + email)
         		!= null) {
             // Refresh Token 삭제
@@ -280,7 +279,7 @@ public class UserController extends HttpServlet {
 		// 유효시간으로 가지는 blacklist를 추가합니다.
 		redisTemplate.opsForValue()
         .set(accessToken, "logout", jwtService.getExpiration(accessToken), TimeUnit.MILLISECONDS);
-		session.invalidate();
+//		session.invalidate();
 		//return "redirect:../";
 		return new ResponseEntity<String>("success", HttpStatus.OK);
 	}

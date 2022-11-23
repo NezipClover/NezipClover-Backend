@@ -2,15 +2,16 @@ package com.ssafy.Whereismyhouse.user.model.dto;
 
 public class UserLoginResponse {
 
-	String email, name, password, result;
+	String email, name, password, result, accessToken;
 	int userKind;
-	public UserLoginResponse(String email, String name, String password, int userKind, String result) {
+	public UserLoginResponse(String email, String name, String password, int userKind, String result, String accessToken) {
 		super();
 		this.email = email;
 		this.name = name;
 		this.password = password;
 		this.result = result;
 		this.userKind = userKind;
+		this.accessToken = accessToken;
 	}
 	public String getEmail() {
 		return email;
@@ -36,16 +37,22 @@ public class UserLoginResponse {
 	public void setResult(String result) {
 		this.result = result;
 	}
+	public String getAccessToken() {
+		return accessToken;
+	}
+	@Override
+	public String toString() {
+		return "UserLoginResponse [email=" + email + ", name=" + name + ", password=" + password + ", result=" + result
+				+ ", accessToken=" + accessToken + ", userKind=" + userKind + "]";
+	}
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
 	public int getUserKind() {
 		return userKind;
 	}
 	public void setUserKind(int userKind) {
 		this.userKind = userKind;
-	}
-	@Override
-	public String toString() {
-		return "UserLoginResponse [email=" + email + ", name=" + name + ", password=" + password + ", result=" + result
-				+ ", userKind=" + userKind + "]";
 	}
 	
 
