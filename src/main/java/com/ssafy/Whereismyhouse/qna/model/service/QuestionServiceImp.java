@@ -21,22 +21,16 @@ public class QuestionServiceImp implements QuestionService {
 
 	@Override
 	//@Transactional(readOnly = true)
-	public List<Question> searchAll(PageBean bean) {
-		
-		int cnt = dao.totalCount(bean);
-		try {
-			PageUtility page = new PageUtility(bean.getInterval()
-											, cnt
-											, bean.getPageNo()
-											, "");
-			bean.setPageLink(page.getPageBar());
-		} catch (Exception e) {
-			
-		}
-		
-		return dao.searchAll(bean);
+	public List<Question> searchAll() {
+		return dao.searchAll();
 	}
 	
+
+	@Override
+	//@Transactional(readOnly = true)
+	public List<Question> searchAllByWord(String searchKey, String word) {
+		return dao.searchAllByWord(searchKey, word);
+	}
 
 	@Override
 	public Question search(int id) {

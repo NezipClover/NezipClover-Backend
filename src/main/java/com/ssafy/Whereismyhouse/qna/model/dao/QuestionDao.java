@@ -10,7 +10,8 @@ import com.ssafy.Whereismyhouse.qna.model.dto.QuestionRegister;
 
 @Mapper
 public interface QuestionDao {
-	public List<Question>  searchAll(PageBean bean);
+	public List<Question>  searchAll();
+	public List<Question>  searchAllByWord(String searchKey, String word);
 	public int totalCount(PageBean bean);
 	public Question  search(int id);
 	public void insert(QuestionRegister questionRegister);

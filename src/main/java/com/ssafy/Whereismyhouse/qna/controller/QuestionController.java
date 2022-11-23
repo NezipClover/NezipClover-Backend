@@ -39,9 +39,31 @@ public class QuestionController {
 	private static final String SUCCESS="success";
 
 	@GetMapping("/list")
-	public ResponseEntity<?> questionList(PageBean bean) {
-		logger.debug("questionList............................{}",bean);
-		List<Question> questions = questionService.searchAll(bean);
+	public ResponseEntity<?> questionList() {
+		logger.debug("questionList............................{}");
+
+		List<Question> questions = questionService.searchAll();	
+
+
+		logger.debug("questionList............................{}",questions);
+		if (!questions.isEmpty()) {
+		return new ResponseEntity<List<Question>>(questions, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}	
+		
+	}
+	@GetMapping("/listByWord/{searchKey}/{word}")
+	public ResponseEntity<?> questionListByWord(@PathVariable String searchKey, @PathVariable String word) {
+		logger.debug("questionList............................{}");
+		System.out.println(searchKey + " " +  word);
+		List<Question> questions;
+		if ((word.isEmpty() || word == "") || searchKey == "all" || searchKey == "") {
+			questions = questionService.searchAll();	
+		} else {
+			questions = questionService.searchAllByWord(searchKey, word);
+			
+		}
 		logger.debug("questionList............................{}",questions);
 		if(questions!=null && !questions.isEmpty()) {
 			return new ResponseEntity<List<Question>>(questions, HttpStatus.OK);
