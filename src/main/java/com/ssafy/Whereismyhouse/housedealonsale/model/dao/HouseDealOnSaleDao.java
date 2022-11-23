@@ -15,4 +15,5 @@ public interface HouseDealOnSaleDao {
 	List<HouseDealOnSale> searchBydealerEmail(String dealerEmail) ;
 	List<HouseDealOnSale> searchByaptCode(int aptCode);
 	void remove(int no) ;
+	List<HouseDealOnSale> searchBydong(String dong);
 }

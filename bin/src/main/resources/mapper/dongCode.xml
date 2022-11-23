@@ -3,12 +3,10 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ssafy.Whereismyhouse.house.model.dao.DongCodeDao">
-<select id="getDongCode" parameterType="map" resultType="String">
+<select id="getDongCode" parameterType="string" resultType="DongCode">
 select *               
 from dongcode          
-where sidoName like #{sido}
-and gugunName = #{gugun}       
-and dongName =#{dong}        
+where dongName like concat('%',#{dong},'%')        
 
 
 </select>

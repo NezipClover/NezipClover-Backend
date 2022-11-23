@@ -47,4 +47,10 @@ public class HouseDealOnSaleServiceImpl implements HouseDealOnSaleService {
 		return dao.searchByaptCode(aptCode);
 	}
 
+	@Override
+	public List<HouseDealOnSale> searchBydong(String dong) {
+		
+		return dao.searchBydong(dong);
+	}
+
 }
