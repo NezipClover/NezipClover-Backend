@@ -39,9 +39,31 @@ public class QuestionController {
 	private static final String SUCCESS="success";
 
 	@GetMapping("/list")
-	public ResponseEntity<?> questionList(PageBean bean) {
-		logger.debug("questionList............................{}",bean);
-		List<Question> questions = questionService.searchAll(bean);
+	public ResponseEntity<?> questionList() {
+		logger.debug("questionList............................{}");
+
+		List<Question> questions = questionService.searchAll();	
+
+
+		logger.debug("questionList............................{}",questions);
+		if (!questions.isEmpty()) {
+		return new ResponseEntity<List<Question>>(questions, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}	
+		
+	}
+	@GetMapping("/listByWord/{searchKey}/{word}")
+	public ResponseEntity<?> questionListByWord(@PathVariable String searchKey, @PathVariable String word) {
+		logger.debug("questionList............................{}");
+		System.out.println(searchKey + " " +  word);
+		List<Question> questions;
+		if ((word.isEmpty() || word == "") || searchKey == "all" || searchKey == "") {
+			questions = questionService.searchAll();	
+		} else {
+			questions = questionService.searchAllByWord(searchKey, word);
+			
+		}
 		logger.debug("questionList............................{}",questions);
 		if(questions!=null && !questions.isEmpty()) {
 			return new ResponseEntity<List<Question>>(questions, HttpStatus.OK);
@@ -52,9 +74,10 @@ public class QuestionController {
 	}
 	
 	@GetMapping("/search/{id}")
-	public ResponseEntity<?> search(@PathVariable int id) {
+	public ResponseEntity<?> search(@PathVariable String id) {
+		System.out.println("id..." + id);
 		logger.debug("questionController.search....................id:{}", id);
-		Question question = questionService.search(id);
+		Question question = questionService.search(Integer.parseInt(id));
 		logger.debug("questionController.search....................question:{}", question);
 		if(question != null) {
 			return new ResponseEntity<Question>(question, HttpStatus.OK);
@@ -77,6 +100,7 @@ public class QuestionController {
 	@PutMapping("/update")
 	public ResponseEntity<String> update(@RequestBody Question question) {
 		logger.debug("questionController.udpate....................questionId:{}", question.getId());
+		System.out.println(question);
 		questionService.update(question);
 		logger.debug("questionController.udpate....................question:{}", question);
 		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);

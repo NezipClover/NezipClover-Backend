@@ -32,6 +32,7 @@ import com.ssafy.Whereismyhouse.user.model.dto.UserModifyRequest;
 import com.ssafy.Whereismyhouse.user.model.service.UserService;
 import com.ssafy.Whereismyhouse.util.JwtServiceImpl;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 
@@ -180,31 +181,40 @@ public class UserController extends HttpServlet {
         if (!jwtService.validateToken(accessToken)) {
         	System.out.println();
             // 유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급
-        	System.out.println("유효하지 않은 access token인 경우 액세스 토큰과 refresh 토큰을 재발급");
-			accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data
-			String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
+        	System.out.println("유효하지 않은 access token인 경우 액세스 토큰을 재발급");
+        	
+            if (redisTemplate.opsForValue().get("RT:" + user.getEmail())
+            		!= null) {
+            	//재발급 성공
+            	accessToken = jwtService.createAccessToken("userid", user.getEmail());// key, data  
+    	    	session.setAttribute("access-token", accessToken);
+            } else { // refresh token이 만기되었으므로 다시 로그인해야함
+            	return new ResponseEntity<String>("세션이 만료되었습니다. 다시 로그인 해 주세요.", HttpStatus.OK);
+            }
 			
-			session = request.getSession();
-			session.setAttribute("userInfo", user);
-			session.setAttribute("access-token", accessToken);
-			redisTemplate.opsForValue()
-            .set("RT:" + user.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+			
+			
+			
+			
+			
+			//String refreshToken = jwtService.createRefreshToken("userid", user.getEmail());// key, data
+			
+//			redisTemplate.opsForValue()
+  //          .set("RT:" + user.getEmail(), refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 			
         }
 	    
-	    
-	    
+	    	session = request.getSession();
+	    	session.setAttribute("userInfo", user);
+
+	
+		    userService.update(user);
+		    System.out.println("modifyProfile....");
+		    String referer = request.getHeader("referer");
+		    System.out.println(referer);
+		    return new ResponseEntity<String>("success", HttpStatus.OK);
 	    
 
-	    session.setAttribute("userInfo", user);
-	    String referer = request.getHeader("referer");
-	    System.out.println(referer);
-
-	    userService.update(user);
-	    System.out.println("modifyProfile....");
-		
-	    System.out.println(user);
-		return new ResponseEntity<String>("success", HttpStatus.OK);
 		
 	   //return "redirect:/user/profile";
 
@@ -277,8 +287,15 @@ public class UserController extends HttpServlet {
         System.out.println("더이상 유효하지 않게 된 accesstoken을 blacklist 추가..");
 		// accessToken을 key로 가지며 해당 토큰의 잔여 유효시간 만큼을 
 		// 유효시간으로 가지는 blacklist를 추가합니다.
-		redisTemplate.opsForValue()
-        .set(accessToken, "logout", jwtService.getExpiration(accessToken), TimeUnit.MILLISECONDS);
+        System.out.println("jwt 만료된 시간?");
+        try {
+        	redisTemplate.opsForValue()
+            .set(accessToken, "logout", jwtService.getExpiration(accessToken), TimeUnit.MILLISECONDS);
+        	logger.info("accessToken을 blacklist에 추가");
+        } catch (ExpiredJwtException e) {
+        	logger.info("accessToken이 이미 만료되었음.");
+        }
+		
 //		session.invalidate();
 		//return "redirect:../";
 		return new ResponseEntity<String>("success", HttpStatus.OK);

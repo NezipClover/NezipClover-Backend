@@ -63,9 +63,10 @@ public class AnswerController {
 		
 	}
 	
-	@PutMapping("/update")
-	public void update(Answer answer, RedirectAttributes redirectAttributes) {
+	@PostMapping("/update")
+	public ResponseEntity<String> update(@RequestBody Answer answer, RedirectAttributes redirectAttributes) {
 		answerService.update(answer);
+		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 	}
 	
 	
