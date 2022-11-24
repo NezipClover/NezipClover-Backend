@@ -8,13 +8,22 @@
 select * from question
 </select> -->
 
-<select id="searchAll"			parameterType="PageBean"	resultType="Question">
+<select id="searchAll"	resultType="Question">
 	select * from question
 	<where>
 		<include refid="searchcon"/>	
 	</where>
 	order by id
-	limit #{start}, #{interval}
+	<!--  limit #{start}, #{interval} -->
+</select>
+<select id="searchAllByWord"	parameterType="map"	resultType="Question">
+	select * from question
+	<!-- <where>
+		<include refid="searchcon"/>	
+	</where> -->
+	where ${searchKey} like concat('%',#{word},'%')
+	order by id
+	<!--  limit #{start}, #{interval} -->
 </select>
 
 <select id="search" parameterType="int" resultType="Question">
