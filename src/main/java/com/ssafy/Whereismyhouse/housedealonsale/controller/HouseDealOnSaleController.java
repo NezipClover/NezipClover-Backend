@@ -48,12 +48,13 @@ public class HouseDealOnSaleController {
 		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 	}
 	
-	@GetMapping("/list")
-	public ResponseEntity<List<HouseDealOnSale>> list(@RequestParam("dong") String dong){
-		logger.info("dongCode 기반 onsaleList");
-		List<HouseDealOnSale> houseList = houseDealOnSaleService.searchBydong(dong);
-		System.out.println(houseList.toString());
-		return new ResponseEntity<List<HouseDealOnSale>>(houseList,HttpStatus.OK);
+	@GetMapping("/search")
+	public ResponseEntity<List<HouseDealOnSale>> list(PageBean bean){
+		logger.info("searching...........................");
+		System.out.println(bean.toString());
+		List<HouseDealOnSale> onSaleList = houseDealOnSaleService.search(bean);
+		System.out.println(onSaleList.toString());
+		return new ResponseEntity<List<HouseDealOnSale>>(onSaleList,HttpStatus.OK);
 	}
 
 //	@PostMapping("/regist")

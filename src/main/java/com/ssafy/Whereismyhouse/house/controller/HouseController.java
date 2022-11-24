@@ -89,6 +89,18 @@ public class HouseController{
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		}
 	}
+	@GetMapping("/dealsearch")
+	public ResponseEntity<?> dealsearch(@RequestParam String aptcode) {
+		System.out.println("dealSearching.........................."+aptcode);
+		logger.debug("houses............................{}",aptcode);
+		List<HouseDeal> deals = houseDealService.search(aptcode);
+		logger.debug("houseList............................{}",deals);
+		if(deals!=null && !deals.isEmpty()) {
+			return new ResponseEntity<List<HouseDeal>>(deals, HttpStatus.OK);
+		}else {
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		}
+	}
 	@GetMapping("/getdongname")
 	public ResponseEntity<?> dongName(@RequestParam String dongname) {
 		logger.debug("dongName............................{}",dongname);

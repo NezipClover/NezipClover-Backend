@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.ssafy.Whereismyhouse.housedealonsale.model.dto.HouseDealOnSale;
+import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 
 
 @Mapper
@@ -16,4 +17,5 @@ public interface HouseDealOnSaleDao {
 	List<HouseDealOnSale> searchByaptCode(int aptCode);
 	void remove(int no) ;
 	List<HouseDealOnSale> searchBydong(String dong);
+	List<HouseDealOnSale> search(PageBean bean);
 }
