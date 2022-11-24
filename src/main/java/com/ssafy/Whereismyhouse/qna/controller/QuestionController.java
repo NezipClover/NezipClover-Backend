@@ -74,9 +74,10 @@ public class QuestionController {
 	}
 	
 	@GetMapping("/search/{id}")
-	public ResponseEntity<?> search(@PathVariable int id) {
+	public ResponseEntity<?> search(@PathVariable String id) {
+		System.out.println("id..." + id);
 		logger.debug("questionController.search....................id:{}", id);
-		Question question = questionService.search(id);
+		Question question = questionService.search(Integer.parseInt(id));
 		logger.debug("questionController.search....................question:{}", question);
 		if(question != null) {
 			return new ResponseEntity<Question>(question, HttpStatus.OK);
@@ -99,6 +100,7 @@ public class QuestionController {
 	@PutMapping("/update")
 	public ResponseEntity<String> update(@RequestBody Question question) {
 		logger.debug("questionController.udpate....................questionId:{}", question.getId());
+		System.out.println(question);
 		questionService.update(question);
 		logger.debug("questionController.udpate....................question:{}", question);
 		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
