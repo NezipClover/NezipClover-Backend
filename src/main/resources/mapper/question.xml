@@ -57,10 +57,10 @@ where id = #{id}
 
 </select>	
 	
-<!-- <insert id='insert'				parameterType="QuestionRegister">
+<insert id='insert'				parameterType="QuestionRegister">
 	insert into question(title,content,author)
 	values ( #{title}, #{content}, #{author} )
-</insert> -->
+</insert>
 
 <update id='update'				parameterType="Question">
 	update question set title = #{title}
