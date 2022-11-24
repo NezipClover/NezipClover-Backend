@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -28,7 +29,7 @@ import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 import com.ssafy.Whereismyhouse.qna.model.service.AnswerService;
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/onSale")
+@RequestMapping("/onsale")
 public class HouseDealOnSaleController {
 	private static final long serialVersionUID = 1L;
 	private Logger logger = LoggerFactory.getLogger(HouseDealOnSaleController.class);
@@ -45,6 +46,15 @@ public class HouseDealOnSaleController {
 		logger.debug("onSale regist..............................{}",houseDealOnSale);
 		houseDealOnSaleService.insert(houseDealOnSale);
 		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+	}
+	
+	@GetMapping("/search")
+	public ResponseEntity<List<HouseDealOnSale>> list(PageBean bean){
+		logger.info("searching...........................");
+		System.out.println(bean.toString());
+		List<HouseDealOnSale> onSaleList = houseDealOnSaleService.search(bean);
+		System.out.println(onSaleList.toString());
+		return new ResponseEntity<List<HouseDealOnSale>>(onSaleList,HttpStatus.OK);
 	}
 
 //	@PostMapping("/regist")

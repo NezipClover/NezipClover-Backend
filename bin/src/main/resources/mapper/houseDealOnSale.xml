@@ -16,6 +16,10 @@
 	<select id ="searchByaptCode" parameterType="int" resultType ="HouseDealOnSale">
 		select * from housedealonsale where aptCode = #{aptCode};
 	</select>
+	<select id ="searchBydong" parameterType="String" resultType ="HouseDealOnSale">
+		select * From housedealonsale hdos where hdos.aptCode in 
+		(select aptCode from houseinfo where dongCode = #{dong});
+	</select>
 	<insert id='insert' parameterType="HouseDealOnSale">
 		INSERT INTO housedealonsale 
 		(aptCode, area, floor, type, dealAmount, rentMoney, dealer_email)

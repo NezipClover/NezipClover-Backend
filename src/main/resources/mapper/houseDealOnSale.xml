@@ -4,7 +4,25 @@
 
 <mapper
 	namespace="com.ssafy.Whereismyhouse.housedealonsale.model.dao.HouseDealOnSaleDao">
-
+	<sql id='searchcon'>
+		<if test="word != null and word !='' ">
+			<choose>
+				<when test ="key=='dealer_email'">
+					dealer_email = #{word}
+				</when>
+				<when test=" key =='aptCode'">
+					aptCode = #{word}
+				</when>
+				
+			</choose>
+		</if>
+	</sql>
+	<select id="search" parameterType="PageBean" resultType="HouseDealOnSale">
+		select * from housedealonsale
+		<where>
+			<include refid="searchcon" />
+		</where>
+	</select>
 	<select id="searchAll" resultType="HouseDealOnSale">
 		select * from housedealonsale;
 	</select>
@@ -15,6 +33,10 @@
 	</select>
 	<select id ="searchByaptCode" parameterType="int" resultType ="HouseDealOnSale">
 		select * from housedealonsale where aptCode = #{aptCode};
+	</select>
+	<select id ="searchBydong" parameterType="String" resultType ="HouseDealOnSale">
+		select * From housedealonsale hdos where hdos.aptCode in 
+		(select aptCode from houseinfo where dongCode = #{dong});
 	</select>
 	<insert id='insert' parameterType="HouseDealOnSale">
 		INSERT INTO housedealonsale 

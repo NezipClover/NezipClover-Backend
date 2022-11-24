@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ssafy.Whereismyhouse.housedealonsale.model.dao.HouseDealOnSaleDao;
 import com.ssafy.Whereismyhouse.housedealonsale.model.dto.HouseDealOnSale;
+import com.ssafy.Whereismyhouse.qna.model.dto.PageBean;
 
 @Service
 public class HouseDealOnSaleServiceImpl implements HouseDealOnSaleService {
@@ -45,6 +46,18 @@ public class HouseDealOnSaleServiceImpl implements HouseDealOnSaleService {
 	@Override
 	public List<HouseDealOnSale> searchByaptCode(int aptCode) {
 		return dao.searchByaptCode(aptCode);
+	}
+
+	@Override
+	public List<HouseDealOnSale> searchBydong(String dong) {
+		
+		return dao.searchBydong(dong);
+	}
+
+	@Override
+	public List<HouseDealOnSale> search(PageBean bean) {
+		
+		return dao.search(bean);
 	}
 
 }

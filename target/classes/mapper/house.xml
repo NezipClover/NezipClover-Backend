@@ -8,6 +8,9 @@
 	<sql id='searchcon'>
 		<if test="word != null and word !='' ">
 			<choose>
+				<when test ="key=='dongCode'">
+					dongCode = #{word}
+				</when>
 				<when test=" key =='aptCode'">
 					aptCode = #{word}
 				</when>
