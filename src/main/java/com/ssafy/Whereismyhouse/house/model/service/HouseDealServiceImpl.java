@@ -1,12 +1,12 @@
 package com.ssafy.Whereismyhouse.house.model.service;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.Whereismyhouse.house.model.dao.HouseDealDao;
+import com.ssafy.Whereismyhouse.house.model.dto.EntireDealAmount;
 import com.ssafy.Whereismyhouse.house.model.dto.HouseDeal;
 
 @Service
@@ -41,6 +41,12 @@ public class HouseDealServiceImpl implements HouseDealService {
 	public void remove(String aptCode)  {
 		dao.remove(aptCode);
 
+	}
+
+	@Override
+	public List<EntireDealAmount> entireDealAmount() {
+		// TODO Auto-generated method stub
+		return dao.EntireDealAmount();
 	}
 
 }

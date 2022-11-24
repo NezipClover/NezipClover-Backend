@@ -9,5 +9,16 @@ select * from housedeal
 where aptCode = #{aptCode}
 </select>
 
+
+<select id="EntireDealAmount" resultType="EntireDealAmount">
+select dongName, count(dongName) as cnt from housedeal as hd
+left join houseinfo as hi
+on hd.aptCode = hi.aptCode
+group by dongName
+order by cnt desc
+limit 0, 11
+</select>
+
+
 	
 </mapper>

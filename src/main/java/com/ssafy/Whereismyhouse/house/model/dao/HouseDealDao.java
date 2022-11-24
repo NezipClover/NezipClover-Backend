@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.ssafy.Whereismyhouse.house.model.dto.EntireDealAmount;
 import com.ssafy.Whereismyhouse.house.model.dto.HouseDeal;
 @Mapper
 public interface HouseDealDao {
@@ -12,4 +13,6 @@ public interface HouseDealDao {
 	void update(HouseDeal houseDeal) ;
 	List<HouseDeal> search(String aptCode) ;
 	void    remove(String aptCode) ;
+	
+	List<EntireDealAmount> EntireDealAmount();
 }

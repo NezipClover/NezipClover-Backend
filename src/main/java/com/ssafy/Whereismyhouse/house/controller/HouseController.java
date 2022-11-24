@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 import com.ssafy.Whereismyhouse.house.model.dto.DongCode;
+import com.ssafy.Whereismyhouse.house.model.dto.EntireDealAmount;
 import com.ssafy.Whereismyhouse.house.model.dto.House;
 import com.ssafy.Whereismyhouse.house.model.dto.HouseDeal;
 import com.ssafy.Whereismyhouse.house.model.dto.Pollution;
@@ -158,6 +159,14 @@ public class HouseController{
 		request.setAttribute("houseDeals", houseDeals);
 		return "houseDealList";
 	}
+	@GetMapping("/entireDealAmount")
+	public ResponseEntity<?> entireDealAmount() {
+		List<EntireDealAmount>  result = houseDealService.entireDealAmount();
+		return new ResponseEntity<List<EntireDealAmount> >(result, HttpStatus.OK);
+	
+	}
+	
+
 //	@GetMapping("/getDong")
 //	private void getDong(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
 //		String dong = request.getParameter("dong");
